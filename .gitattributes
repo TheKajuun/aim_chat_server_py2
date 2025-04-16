@@ -1,2 +1,4 @@
+# What is the purpose of this file? text auto? is that not already the default?
+
 # Auto detect text files and perform LF normalization
 * text=auto
