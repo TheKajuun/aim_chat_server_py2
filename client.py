@@ -19,10 +19,13 @@ def send(event=None):  # event is passed by binders.
     """Handles sending of messages."""
     msg = my_msg.get()
     my_msg.set("")  # Clears input field.
-    client_socket.send(bytes(msg, "utf8"))
-    if msg == "{quit}":
-        client_socket.close()
-        top.quit()
+    try:
+        client_socket.send(bytes(msg, "utf8"))
+        if msg == "{quit}":
+            client_socket.close()
+            top.quit()
+    except NameError:
+        msg_list.insert(tkinter.END, "You are not connected to the server.")    
 
 
 def on_closing(event=None):
@@ -63,9 +66,17 @@ else:
 BUFSIZ = 1024
 ADDR = (HOST, PORT)
 
-client_socket = socket(AF_INET, SOCK_STREAM)
-client_socket.connect(ADDR)
+try:
+    client_socket = socket(AF_INET, SOCK_STREAM)
+    client_socket.connect(ADDR)
+except Exception as e:
+    print(f"Error: Unable to connect to the server at {ADDR}.")
+    print(f"Details: {e}")
+    client_socket = None  # Ensure client_socket is defined even if connection fails
 
-receive_thread = Thread(target=receive)
-receive_thread.start()
-tkinter.mainloop()  # Starts GUI execution.
+if client_socket:
+    receive_thread = Thread(target=receive)
+    receive_thread.start()
+    tkinter.mainloop()  # Starts GUI execution
+else:
+    print("Client could not start due to connection issues.")
